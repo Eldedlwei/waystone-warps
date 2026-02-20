@@ -43,7 +43,7 @@ class WaystoneInteractListener(private val configService: ConfigService): Listen
 
     private val openOtherMenuPermission = "waystonewarps.bypass.open_menu"
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
     fun onLodestoneInteract(event: PlayerInteractEvent) {
         val player: Player = event.player
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
@@ -54,8 +54,10 @@ class WaystoneInteractListener(private val configService: ConfigService): Listen
         val itemInHand = event.player.inventory.itemInMainHand
         if (itemInHand.type == Material.COMPASS) return
 
-        // Check for existing warp
-        val warp = getWarpAtPosition.execute(clickedBlock.location.toPosition3D(), clickedBlock.world.uid)
+        // Check for existing warp at the clicked block and adjacent blocks.
+        // This avoids falling through to the create path when a waystone is
+        // represented by a nearby block in legacy/mismatched states.
+        val warp = getWarpAtOrAdjacentPosition(clickedBlock)
         val menuNavigator = MenuNavigator(player)
 
         // Existing warp path: open/manage/discover and stop.
@@ -164,4 +166,9 @@ class WaystoneInteractListener(private val configService: ConfigService): Listen
             menuNavigator.openMenu(WarpNamingMenu(player, menuNavigator, clickedBlock.location))
         }
     }
+
+    private fun getWarpAtOrAdjacentPosition(block: Block) =
+        getWarpAtPosition.execute(block.location.toPosition3D(), block.world.uid)
+            ?: getWarpAtPosition.execute(block.location.clone().add(0.0, 1.0, 0.0).toPosition3D(), block.world.uid)
+            ?: getWarpAtPosition.execute(block.location.clone().subtract(0.0, 1.0, 0.0).toPosition3D(), block.world.uid)
 }

@@ -44,7 +44,7 @@ class WarpRepositorySQLite(private val storage: Storage<Database>): WarpReposito
     }
 
     override fun getByPosition(position: Position3D, worldId: UUID): Warp? {
-        return warps.values.firstOrNull { it.position == position }
+        return warps.values.firstOrNull { it.position == position && it.worldId == worldId }
     }
 
     override fun add(warp: Warp) {
