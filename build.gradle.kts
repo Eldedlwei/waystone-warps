@@ -54,7 +54,6 @@ dependencies {
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.3.0")
     compileOnly("io.insert-koin:koin-core-jvm:4.1.1")
     implementation("co.aikar:idb-core:1.0.0-SNAPSHOT")
-    implementation("co.aikar:acf-paper:0.5.1-SNAPSHOT")
     compileOnly("com.zaxxer:HikariCP:7.0.2")
     // implementation("com.github.mizarc:IF:0.11.4-d")
     implementation("com.github.stefvanschie.inventoryframework:IF:0.11.6")

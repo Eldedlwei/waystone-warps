@@ -4,7 +4,6 @@ import IconMeta
 import dev.mizarc.waystonewarps.domain.positioning.Position3D
 import java.time.Instant
 import java.util.*
-import kotlin.concurrent.thread
 
 /**
  * Stores Warp information.
@@ -20,7 +19,7 @@ class Warp(val id: UUID, val playerId: UUID, val creationTime: Instant, var name
     var breakCount = 3
 
     private val defaultBreakCount = 3
-    private var breakPeriod = false
+    private var breakWindowStart: Instant? = null
 
     /**
      * Compiles a new warp based on the minimum details required.
@@ -38,13 +37,11 @@ class Warp(val id: UUID, val playerId: UUID, val creationTime: Instant, var name
      * Resets the break count after a set period of time.
      */
     fun resetBreakCount() {
-        if (!breakPeriod) {
-            thread(start = true) {
-                breakPeriod = true
-                Thread.sleep(10000)
-                breakCount = defaultBreakCount
-                breakPeriod = false
-            }
+        val now = Instant.now()
+        val windowStart = breakWindowStart
+        if (windowStart == null || now.isAfter(windowStart.plusSeconds(10))) {
+            breakCount = defaultBreakCount
+            breakWindowStart = now
         }
     }
 

@@ -18,6 +18,7 @@ import dev.mizarc.waystonewarps.interaction.utils.name
 import io.papermc.paper.datacomponent.DataComponentTypes
 import io.papermc.paper.registry.RegistryAccess
 import io.papermc.paper.registry.RegistryKey
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -27,9 +28,9 @@ import org.bukkit.inventory.meta.FireworkEffectMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.PotionMeta
 import org.bukkit.inventory.meta.SkullMeta
+import org.bukkit.plugin.java.JavaPlugin
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import kotlin.concurrent.thread
 
 class WarpIconMenu(
     private val player: Player,
@@ -76,8 +77,8 @@ class WarpIconMenu(
 
             inputPane.addItem(GuiItem(ItemStack(itemOnCursor.clone())), 0, 0)
             gui.update()
-            thread(start = true) {
-                Thread.sleep(1)
+            val plugin = JavaPlugin.getProvidingPlugin(WarpIconMenu::class.java)
+            Bukkit.getScheduler().runTask(plugin) {
                 player.setItemOnCursor(itemOnCursor)
             }
         }
@@ -170,7 +171,7 @@ class WarpIconMenu(
                     )
                 }
 
-                val result = updateWarpIcon.execute(
+                updateWarpIcon.execute(
                     editorPlayerId = player.uniqueId,
                     warpId = warp.id,
                     materialName = newIcon.type.name,

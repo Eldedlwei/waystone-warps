@@ -14,7 +14,6 @@ import org.bukkit.entity.BlockDisplay
 import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.plugin.Plugin
-import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.util.Transformation
 import org.joml.AxisAngle4f
 import org.joml.Vector3f
@@ -34,11 +33,9 @@ class StructureBuilderServiceBukkit(private val plugin: Plugin, private val conf
 
         // Generate and then remove existing block display after 2 ticks to prevent flashing
         val entityList = generateStructure(warp, structureBlocks, world)
-        object : BukkitRunnable() {
-            override fun run() {
-                removeBlockDisplay(warp, world, entityList)
-            }
-        }.runTaskLater(plugin, 2L)
+        Bukkit.getScheduler().runTaskLater(plugin, Runnable {
+            removeBlockDisplay(warp, world, entityList)
+        }, 2L)
     }
 
     override fun revertStructure(warp: Warp) {
@@ -80,11 +77,9 @@ class StructureBuilderServiceBukkit(private val plugin: Plugin, private val conf
         location.block.type = structureBlocks[1]
 
         // Replace bottom block with slab (delay to avoid POI data mismatch error)
-        object : BukkitRunnable() {
-            override fun run() {
-                world.getBlockAt(location.blockX, location.blockY - 1, location.blockZ).type = structureBlocks[4]
-            }
-        }.runTaskLater(plugin, 2L)
+        Bukkit.getScheduler().runTaskLater(plugin, Runnable {
+            world.getBlockAt(location.blockX, location.blockY - 1, location.blockZ).type = structureBlocks[4]
+        }, 2L)
 
         // Create and return entities
         return mutableListOf(

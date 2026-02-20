@@ -14,6 +14,8 @@ import dev.mizarc.waystonewarps.interaction.messaging.PrimaryColourPalette
 import dev.mizarc.waystonewarps.interaction.utils.PermissionHelper
 import dev.mizarc.waystonewarps.interaction.utils.lore
 import dev.mizarc.waystonewarps.interaction.utils.name
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
@@ -35,7 +37,12 @@ class WarpRenamingMenu(
         // Check if the player has permission to rename this warp
         val canRename = PermissionHelper.canRename(player, warp.playerId)
         if (!canRename) {
-            player.sendMessage("§c${localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_MANAGEMENT_COMMON_NO_PERMISSION)}")
+            player.sendMessage(
+                Component.text(
+                    localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_MANAGEMENT_COMMON_NO_PERMISSION),
+                    NamedTextColor.RED
+                )
+            )
             menuNavigator.goBack()
             return
         }
@@ -116,7 +123,12 @@ class WarpRenamingMenu(
                 }
                 UpdateWarpNameResult.NAME_BLANK -> menuNavigator.goBack()
                 UpdateWarpNameResult.NOT_AUTHORIZED -> {
-                    player.sendMessage("§c${localizationProvider.get(player.uniqueId, LocalizationKeys.CONDITION_NAMING_NO_PERMISSION)}")
+                    player.sendMessage(
+                        Component.text(
+                            localizationProvider.get(player.uniqueId, LocalizationKeys.CONDITION_NAMING_NO_PERMISSION),
+                            NamedTextColor.RED
+                        )
+                    )
                     menuNavigator.goBack()
                 }
             }

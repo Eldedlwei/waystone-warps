@@ -21,8 +21,11 @@ import dev.mizarc.waystonewarps.interaction.messaging.PrimaryColourPalette
 import dev.mizarc.waystonewarps.interaction.utils.PermissionHelper
 import dev.mizarc.waystonewarps.interaction.utils.createHead
 import dev.mizarc.waystonewarps.interaction.utils.lore
+import dev.mizarc.waystonewarps.interaction.utils.loreComponents
 import dev.mizarc.waystonewarps.interaction.utils.name
 import me.xdrop.fuzzywuzzy.FuzzySearch
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.OfflinePlayer
@@ -46,7 +49,12 @@ class WarpPlayerMenu(private val player: Player, private val menuNavigator: Menu
     override fun open() {
         val canManageWhitelist = PermissionHelper.canManageWhitelist(player, warp.playerId)
         if (!canManageWhitelist) {
-            player.sendMessage("§c${localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_NO_PERMISSION)}")
+            player.sendMessage(
+                Component.text(
+                    localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_NO_PERMISSION),
+                    NamedTextColor.RED
+                )
+            )
             menuNavigator.goBack()
             return
         }
@@ -235,26 +243,52 @@ class WarpPlayerMenu(private val player: Player, private val menuNavigator: Menu
         val discovered = getWarpPlayerAccess.execute(warp.id)
         val canManageWhitelist = PermissionHelper.canManageWhitelist(player, warp.playerId)
         val stockLore = if (canManageWhitelist) {
-            listOf(localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_TOGGLE_WHITELIST))
+            listOf(
+                Component.text(
+                    localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_TOGGLE_WHITELIST),
+                    NamedTextColor.GRAY
+                )
+            )
         } else {
-            listOf("§c${localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_NO_PERMISSION)}")
+            listOf(
+                Component.text(
+                    localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_NO_PERMISSION),
+                    NamedTextColor.RED
+                )
+            )
         }
+
+        val whitelistedLore = Component.text(
+            localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_WHITELISTED),
+            NamedTextColor.GREEN
+        )
 
         for (foundPlayer in players) {
             // Modify lore text depending on if the player has discovered this warp or is whitelisted
             val customLore = stockLore.toMutableList()
             if (foundPlayer.uniqueId in discovered) {
-                customLore.add(0, "§b${localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_DISCOVERED)}")
-                customLore.add(localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_REVOKE_ACCESS))
+                customLore.add(
+                    0,
+                    Component.text(
+                        localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_DISCOVERED),
+                        NamedTextColor.AQUA
+                    )
+                )
+                customLore.add(
+                    Component.text(
+                        localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_REVOKE_ACCESS),
+                        NamedTextColor.GRAY
+                    )
+                )
             }
             if (foundPlayer.uniqueId in whitelisted) {
-                customLore.add(0, "§aWhitelisted")
+                customLore.add(0, whitelistedLore)
             }
 
             // Create player menu item
             val playerItem = createHead(foundPlayer)
                 .name("${foundPlayer.name}")
-                .lore(customLore)
+                .loreComponents(customLore)
 
             // Define actions on clickable player head icon
             lateinit var guiPlayerItem: GuiItem
@@ -270,15 +304,15 @@ class WarpPlayerMenu(private val player: Player, private val menuNavigator: Menu
                     )
                     result.onSuccess { isWhitelisted ->
                         if (isWhitelisted) {
-                            customLore.add(0, "§a${localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_WHITELISTED)}")
+                            customLore.add(0, whitelistedLore)
                         } else {
-                            customLore.remove("§a${localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_PLAYER_ITEM_PLAYER_LORE_WHITELISTED)}")
-                        if (viewMode == 1) {
+                            customLore.remove(whitelistedLore)
+                            if (viewMode == 1) {
                                 currentPagePane.removeItem(guiPlayerItem)
                             }
                         }
                         playerItem.lore()
-                        playerItem.lore(customLore)
+                        playerItem.loreComponents(customLore)
                         gui.update()
                     }
                 }

@@ -10,6 +10,7 @@ import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.TextComponent
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.*
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
@@ -45,7 +46,7 @@ fun ItemStack.name(name: String, color: TextColor = NamedTextColor.GOLD): ItemSt
 fun ItemStack.name(textComponent: Component): ItemStack {
     val meta = itemMeta
     meta.addItemFlags(*ItemFlag.entries.toTypedArray())
-    meta.displayName(textComponent)
+    meta.displayName(textComponent.decoration(TextDecoration.ITALIC, false))
     itemMeta = meta
     return this
 }
@@ -64,6 +65,22 @@ fun ItemStack.lore(text: String, color: TextColor = NamedTextColor.GRAY): ItemSt
 
 fun ItemStack.lore(vararg text: String, color: TextColor = NamedTextColor.GRAY): ItemStack {
     Arrays.stream(text).forEach { this.lore(it, color) }
+    return this
+}
+
+fun ItemStack.lore(textComponent: Component): ItemStack {
+    val meta = itemMeta ?: return this
+    val currentLore = meta.lore() ?: mutableListOf()
+    currentLore.add(textComponent.decoration(TextDecoration.ITALIC, false))
+    meta.lore(currentLore)
+    itemMeta = meta
+    return this
+}
+
+fun ItemStack.loreComponents(textComponents: List<Component>): ItemStack {
+    val meta = itemMeta ?: return this
+    meta.lore(textComponents.map { it.decoration(TextDecoration.ITALIC, false) })
+    itemMeta = meta
     return this
 }
 

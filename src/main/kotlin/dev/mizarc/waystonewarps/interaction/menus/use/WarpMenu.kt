@@ -23,9 +23,11 @@ import org.bukkit.Material
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import dev.mizarc.waystonewarps.interaction.utils.lore
+import dev.mizarc.waystonewarps.interaction.utils.loreComponents
 import dev.mizarc.waystonewarps.interaction.utils.name
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -230,7 +232,10 @@ class WarpMenu(
         var currentPagePane = OutlinePane(0, 0, 7, 3)
         var playerCounter = 0
         val stockLore = listOf(
-            localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_ITEM_WARP_LORE_RIGHT_CLICK)
+            Component.text(
+                localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_ITEM_WARP_LORE_RIGHT_CLICK),
+                NamedTextColor.GRAY
+            )
         )
 
         for (warp in warps) {
@@ -242,8 +247,8 @@ class WarpMenu(
             }
             
             val customLore = stockLore.toMutableList()
-            customLore.add(0, "§8$locationText")
-            customLore.add(0, "§b${warpModel.player.name}")
+            customLore.add(0, Component.text(locationText, NamedTextColor.DARK_GRAY))
+            customLore.add(0, Component.text(warpModel.player.name, NamedTextColor.AQUA))
 
             val hasTeleportPermission = player.hasPermission("waystonewarps.teleport")
             val isDifferentWorld = warp.worldId != player.world.uid
@@ -255,30 +260,26 @@ class WarpMenu(
 
             // Add the locked status if applicable
             if (isLocked) {
-                customLore.add(2, "§c${localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_ITEM_WARP_LORE_LOCKED)}")
+                customLore.add(2, Component.text(localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_ITEM_WARP_LORE_LOCKED), NamedTextColor.RED))
             }
 
             // Add permission-related lore (only show one message at a time, priority order)
             when {
                 !hasTeleportPermission -> {
-                    customLore.add(2, "§c${
-                        localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_ITEM_WARP_LORE_NO_TELEPORT_PERMISSION)
-                    }")
+                    customLore.add(2, Component.text(localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_ITEM_WARP_LORE_NO_TELEPORT_PERMISSION), NamedTextColor.RED))
                 }
                 isDifferentWorld && !hasInterworldPermission -> {
-                    customLore.add(2, "§c${
-                        localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_ITEM_WARP_LORE_NO_INTERWORLD_PERMISSION)
-                    }")
+                    customLore.add(2, Component.text(localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_ITEM_WARP_LORE_NO_INTERWORLD_PERMISSION), NamedTextColor.RED))
                 }
                 isLocked -> {
                     // No additional message needed if locked
                 }
                 else -> {
-                    customLore.add(2, localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_ITEM_WARP_LORE_LEFT_CLICK))
+                    customLore.add(2, Component.text(localizationProvider.get(player.uniqueId, LocalizationKeys.MENU_WARP_ITEM_WARP_LORE_LEFT_CLICK), NamedTextColor.GRAY))
                 }
             }
 
-            val warpItem = ItemStack(warpModel.icon).applyIconMeta(warp.iconMeta).name(warpModel.name).lore(customLore)
+            val warpItem = ItemStack(warpModel.icon).applyIconMeta(warp.iconMeta).name(warpModel.name).loreComponents(customLore)
 
             val guiWarpItem = if (hasPermission && !isLocked) {
                 // Player has permission and warp is not locked to them - allow interaction

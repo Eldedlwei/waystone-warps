@@ -8,7 +8,6 @@ import dev.mizarc.waystonewarps.infrastructure.mappers.toLocation
 import org.bukkit.Bukkit
 import org.bukkit.Particle
 import org.bukkit.plugin.java.JavaPlugin
-import org.bukkit.scheduler.BukkitRunnable
 import org.bukkit.scheduler.BukkitTask
 import java.util.*
 
@@ -25,29 +24,26 @@ class StructureParticleServiceBukkit(private val plugin: JavaPlugin,
         location.y += 0.5
         location.z += 0.5
 
-        val particles = object : BukkitRunnable() {
-            override fun run() {
-                for (player in Bukkit.getOnlinePlayers()) {
-                    if (player.location.world == location.world && player.location.distance(location)
-                        <= Bukkit.getServer().viewDistance * 16
-                    ) {
-                        val discovered = playerDiscoveryRepository.getByWarpAndPlayer(warp.id, player.uniqueId)
-                        val whitelisted = whitelistRepository.isWhitelisted(warp.id, player.uniqueId)
+        val particles = Bukkit.getScheduler().runTaskTimer(plugin, Runnable {
+            for (player in Bukkit.getOnlinePlayers()) {
+                if (player.location.world == location.world && player.location.distance(location)
+                    <= Bukkit.getServer().viewDistance * 16
+                ) {
+                    val discovered = playerDiscoveryRepository.getByWarpAndPlayer(warp.id, player.uniqueId)
+                    val whitelisted = whitelistRepository.isWhitelisted(warp.id, player.uniqueId)
 
-                        if (warp.playerId == player.uniqueId) {
-                            player.spawnParticle(Particle.HAPPY_VILLAGER, location, 1, 0.5, 0.5, 0.5)
-                        } else if (warp.isLocked && !whitelisted) {
-                            player.spawnParticle(Particle.WAX_ON, location, 1, 0.5, 0.5, 0.5)
-                        } else {
-                            val particle = if (discovered != null) Particle.SCRAPE else Particle.WAX_OFF
-                            player.spawnParticle(particle, location, 1, 0.5, 0.5, 0.5)
-                        }
-
+                    if (warp.playerId == player.uniqueId) {
+                        player.spawnParticle(Particle.HAPPY_VILLAGER, location, 1, 0.5, 0.5, 0.5)
+                    } else if (warp.isLocked && !whitelisted) {
+                        player.spawnParticle(Particle.WAX_ON, location, 1, 0.5, 0.5, 0.5)
+                    } else {
+                        val particle = if (discovered != null) Particle.SCRAPE else Particle.WAX_OFF
+                        player.spawnParticle(particle, location, 1, 0.5, 0.5, 0.5)
                     }
                 }
             }
-        }.runTaskTimer(plugin, 0L, 5L)
-        activeParticles.put(warp.id, particles)
+        }, 0L, 5L)
+        activeParticles[warp.id] = particles
     }
 
     override fun removeParticles(warp: Warp) {

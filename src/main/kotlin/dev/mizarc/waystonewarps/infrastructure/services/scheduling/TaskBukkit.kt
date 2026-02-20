@@ -1,10 +1,10 @@
 package dev.mizarc.waystonewarps.infrastructure.services.scheduling
 
 import dev.mizarc.waystonewarps.application.services.scheduling.Task
-import org.bukkit.scheduler.BukkitRunnable
+import org.bukkit.scheduler.BukkitTask
 
-class TaskBukkit(private val runnable: BukkitRunnable) : Task {
+class TaskBukkit(private val task: BukkitTask) : Task {
     override fun cancel() {
-        runnable.cancel()
+        task.cancel()
     }
 }

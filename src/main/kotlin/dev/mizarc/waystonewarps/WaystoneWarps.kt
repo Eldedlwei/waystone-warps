@@ -1,6 +1,5 @@
 package dev.mizarc.waystonewarps
 
-import co.aikar.commands.PaperCommandManager
 import co.aikar.idb.Database
 import dev.mizarc.waystonewarps.api.WaystoneWarpsAPI
 import dev.mizarc.waystonewarps.application.actions.administration.ListInvalidWarps
@@ -61,6 +60,7 @@ import dev.mizarc.waystonewarps.interaction.localization.LocalizationProvider
 import net.milkbowl.vault.economy.Economy
 import org.bukkit.Bukkit
 import org.bukkit.plugin.ServicePriority
+import io.papermc.paper.plugin.lifecycle.event.types.LifecycleEvents
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import java.io.File
@@ -74,7 +74,6 @@ class WaystoneWarps: JavaPlugin() {
             private set
     }
 
-    private lateinit var commandManager: PaperCommandManager
     private lateinit var metadata: Chat
     private var economy: Economy? = null
 
@@ -123,9 +122,6 @@ class WaystoneWarps: JavaPlugin() {
             server.pluginManager.disablePlugin(this)
             return
         }
-
-        // Get command manager
-        commandManager = PaperCommandManager(this)
 
         // Initialise everything else
         initialiseConfig()
@@ -262,9 +258,16 @@ class WaystoneWarps: JavaPlugin() {
     }
 
     private fun registerCommands() {
-        commandManager.registerCommand(WarpMenuCommand())
-        commandManager.registerCommand(InvalidsCommand())
-        commandManager.registerCommand(WarpCreateCommand())
+        val warpMenuCommand = WarpMenuCommand()
+        val invalidsCommand = InvalidsCommand()
+        val warpCreateCommand = WarpCreateCommand()
+
+        lifecycleManager.registerEventHandler(LifecycleEvents.COMMANDS) { event ->
+            val commands = event.registrar()
+            warpMenuCommand.register(commands)
+            invalidsCommand.register(commands)
+            warpCreateCommand.register(commands)
+        }
     }
 
     private fun registerEvents() {
