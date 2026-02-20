@@ -1,6 +1,5 @@
 package dev.mizarc.waystonewarps.interaction.menus.management
 
-import com.destroystokyo.paper.profile.PlayerProfile
 import com.github.stefvanschie.inventoryframework.gui.GuiItem
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
 import com.github.stefvanschie.inventoryframework.gui.type.util.Gui
