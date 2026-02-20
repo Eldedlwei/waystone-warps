@@ -248,7 +248,7 @@ class WarpMenu(
             
             val customLore = stockLore.toMutableList()
             customLore.add(0, Component.text(locationText, NamedTextColor.DARK_GRAY))
-            customLore.add(0, Component.text(warpModel.player.name, NamedTextColor.AQUA))
+            customLore.add(0, Component.text(warpModel.player.name ?: "Unknown", NamedTextColor.AQUA))
 
             val hasTeleportPermission = player.hasPermission("waystonewarps.teleport")
             val isDifferentWorld = warp.worldId != player.world.uid

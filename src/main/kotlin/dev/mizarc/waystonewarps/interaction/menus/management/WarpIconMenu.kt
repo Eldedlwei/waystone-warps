@@ -78,9 +78,9 @@ class WarpIconMenu(
             inputPane.addItem(GuiItem(ItemStack(itemOnCursor.clone())), 0, 0)
             gui.update()
             val plugin = JavaPlugin.getProvidingPlugin(WarpIconMenu::class.java)
-            Bukkit.getScheduler().runTask(plugin) {
+            Bukkit.getScheduler().runTask(plugin, Runnable {
                 player.setItemOnCursor(itemOnCursor)
-            }
+            })
         }
         gui.ingredientComponent.addPane(inputPane)
 
