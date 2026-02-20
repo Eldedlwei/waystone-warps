@@ -58,7 +58,8 @@ class WaystoneInteractListener(private val configService: ConfigService): Listen
         val warp = getWarpAtPosition.execute(clickedBlock.location.toPosition3D(), clickedBlock.world.uid)
         val menuNavigator = MenuNavigator(player)
 
-        // Create new warp if not found, open management menu if owner, discover otherwise
+        // Existing warp path: open/manage/discover and stop.
+        // Do not continue into the creation branch below, which fires a synthetic BlockPlaceEvent.
         warp?.let {
             // Check if warp is locked and alert if no access
             player.swingMainHand()
@@ -130,6 +131,7 @@ class WaystoneInteractListener(private val configService: ConfigService): Listen
                     }
                 }
             }
+            return
         }
 
         // Check if valid warp base to create warp
