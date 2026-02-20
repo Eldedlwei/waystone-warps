@@ -29,6 +29,7 @@ import org.bukkit.event.Listener
 import org.bukkit.event.block.Action
 import org.bukkit.event.block.BlockPlaceEvent
 import org.bukkit.event.player.PlayerInteractEvent
+import org.bukkit.event.Event
 import org.bukkit.inventory.EquipmentSlot
 import org.bukkit.inventory.ItemStack
 import org.koin.core.component.KoinComponent
@@ -43,12 +44,13 @@ class WaystoneInteractListener(private val configService: ConfigService): Listen
 
     private val openOtherMenuPermission = "waystonewarps.bypass.open_menu"
 
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = false)
     fun onLodestoneInteract(event: PlayerInteractEvent) {
         val player: Player = event.player
         if (event.action != Action.RIGHT_CLICK_BLOCK) return
         if (event.hand == EquipmentSlot.OFF_HAND) return
         val clickedBlock: Block = event.clickedBlock ?: return
+        if (event.isCancelled || event.useInteractedBlock() == Event.Result.DENY) return
 
         // Check for holding compass
         val itemInHand = event.player.inventory.itemInMainHand
@@ -65,7 +67,6 @@ class WaystoneInteractListener(private val configService: ConfigService): Listen
         warp?.let {
             // Check if warp is locked and alert if no access
             player.swingMainHand()
-            event.isCancelled = true
             val isOwner = warp.playerId == player.uniqueId
             val canOpenOtherMenu = player.hasPermission(openOtherMenuPermission)
             val isAdminMenuOpenAttempt = !isOwner && canOpenOtherMenu && player.isSneaking
@@ -123,10 +124,7 @@ class WaystoneInteractListener(private val configService: ConfigService): Listen
                     clickedBlock.world.spawnParticle(Particle.TOTEM_OF_UNDYING, particleLocation, 20)
                     clickedBlock.world.playSound(particleLocation, Sound.BLOCK_AMETHYST_BLOCK_HIT, SoundCategory.BLOCKS, 1.0f, 1.0f)
                 } else {
-                    if (configService.allowWarpsMenuViaWaystone()) {
-                        menuNavigator.openMenu(WarpMenu(player, menuNavigator, localizationProvider))
-                    }
-                    else {
+                    if (!configService.allowWarpsMenuViaWaystone()) {
                         player.sendActionBar(Component.text("Warp ").color(PrimaryColourPalette.INFO.color)
                             .append(Component.text(warp.name).color(AccentColourPalette.INFO.color))
                             .append(Component.text( " already discovered").color(PrimaryColourPalette.INFO.color)))
@@ -140,7 +138,6 @@ class WaystoneInteractListener(private val configService: ConfigService): Listen
         val baseBlock = clickedBlock.getRelative(BlockFace.DOWN)
         if (isValidWarpBase.execute(baseBlock.type.toString()) && clickedBlock.type == Material.LODESTONE) {
             player.swingMainHand()
-            event.isCancelled = true
             val clicked = event.clickedBlock ?: return
 
             // Send out a fake BlockPlaceEvent for protection plugins to hook
