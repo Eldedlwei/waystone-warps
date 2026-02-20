@@ -99,7 +99,6 @@ class WaystoneWarps: JavaPlugin() {
     private lateinit var scheduler: SchedulerService
     private lateinit var warpEventPublisher: WarpEventPublisher
     private lateinit var playerLocaleService: PlayerLocaleService
-    private lateinit var localizationProvider: LocalizationProvider
 
     override fun onEnable() {
         // Create plugin folder
@@ -196,12 +195,12 @@ class WaystoneWarps: JavaPlugin() {
         worldService = WorldServiceBukkit()
         warpEventPublisher = WarpEventPublisherBukkit()
         playerLocaleService = PlayerLocaleServicePaper()
-        localizationProvider = PropertiesLocalizationProvider(configService, dataFolder, PlayerLocaleServicePaper())
     }
 
     fun initialiseLang() {
         val defaultLanguageFilenames = listOf(
-            "en.properties"
+            "en.properties",
+            "zh_cn.properties"
         )
 
         // Move languages to the required folder and add readme for override instructions
